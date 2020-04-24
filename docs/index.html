@@ -1,0 +1,273 @@
+﻿<html>
+<head>
+    <title>Non-linear least squares</title>
+    <link rel="stylesheet" type="text/css" href="./main.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta charset="utf-8" content=" text/html" http-equiv="content-type" />
+</head>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<body>
+    <div class="parentControl container-fluid">
+        <div class="parentRow d-flex flex-row">
+            <div class="leftColumn d-flex flex-column">
+                <div id="methods" class="container">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Gradient descent
+                            </button>
+                        </div>
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#methods">
+                            <div class="card-body">
+                                <div class="form-group form-row">
+                                    <label for="gradientDescent"  class="col">Use</label>
+                                    <div class="col">
+                                        <input type="checkbox" id="gradientDescent" class="form-control" checked/>
+                                    </div>
+                                </div>
+                                <div class="form-group form-row">
+                                    <label for="gradDescIterations" class="col">Iterations</label>
+                                    <div class="col">
+                                        <input type="number" id="gradDescIterations"  class="form-control" value="50" min="1"/>
+                                    </div>
+                                </div>
+                                <div class="form-group form-row">
+                                    <label for="gradDescRate" class="col">Rate</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="gradDescRate" value="0.01" min="0" max="1" step="0.05"/>
+                                    </div>
+                                </div>
+                                <div class="form-group form-row">
+                                    <label for="gradErrAbsTol" class="col">ErrAbsTol</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="gradErrAbsTol" value="0" min="0" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Newton's method
+                            </button>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#methods">  
+                            <div class="card-body">              
+                                <div class="form-group form-row">
+                                    <label for="newton" class="col">Use</label>
+                                    <div class="col">
+                                        <input type="checkbox" class="form-control" id="newton" checked/>
+                                    </div>
+                                </div>                   
+                                <div class="form-group form-row">
+                                    <label for="newtonIterations" class="col">Iterations</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="newtonIterations" value="50" min="1"/>
+                                    </div>
+                                </div>              
+                                <div class="form-group form-row">
+                                    <label for="newtonAlpha" class="col">Alpha</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="newtonAlpha" value="0.95" min="0" max="1" step="0.05"/>
+                                    </div>
+                                </div>              
+                                <div class="form-group form-row">
+                                    <label for="newtonFAbsTol" class="col">FAbsTol</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="newtonFAbsTol" value="0" min="0"/>
+                                    </div>
+                                </div>  
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingThree">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                            Gauss-Newton method
+                            </button>
+                        </div>
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#methods">
+                            <div class="card-body">
+                                <div class="form-group form-row">
+                                    <label for="gaussNewton" class="col">Use</label>
+                                    <div class="col">
+                                        <input type="checkbox" class="form-control" id="gaussNewton" checked/>
+                                    </div>
+                                </div>                     
+                                <div class="form-group form-row">
+                                    <label for="gaussNewtonIterations" class="col"> Iterations</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="gaussNewtonIterations" value="50" min="1"/>   
+                                    </div>
+                                </div>                     
+                                <div class="form-group form-row">
+                                    <label for="gaussNewtonErrAbsTol" class="col">ErrAbsTol</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="gaussNewtonErrAbsTol" value="0" min="0"/>
+                                    </div>
+                                </div>   
+                            </div> 
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingFour">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                            Particle swarm method
+                            </button>
+                        </div>
+                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#methods">   
+                            <div class="card-body">              
+                                <div class="form-group form-row">
+                                    <label for="particleSwarm" class="col">Use</label>
+                                    <div class="col">
+                                        <input type="checkbox" class="form-control" id="particleSwarm" checked/>
+                                    </div>
+                                </div>
+                                <div class="form-group form-row">
+                                    <label for="swarmIterations" class="col">Iterations</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmIterations" value="30" min="1"/>  
+                                    </div>
+                                </div>                             
+                                <div class="form-group form-row">
+                                    <label for="swarParticles" class="col">Particles</label>
+                                    <div  class="col">
+                                        <input type="number" class="form-control" id="swarParticles" value="15" min="0"/>  
+                                    </div>
+                                </div>                             
+                                <div class="form-group form-row">
+                                    <label for="swarmW" class="col">W</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmW" value="0.3" min="0" step="0.05"/>     
+                                    </div>
+                                </div>                          
+                                <div class="form-group form-row">
+                                    <label for="swarmPhi_p" class="col">&phi; p</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmPhi_p" value="0.3" min="0" step="0.05"/>   
+                                    </div>
+                                </div>                            
+                                <div class="form-group form-row">
+                                    <label for="swarmPhi_g" class="col">&phi; g</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmPhi_g" value="0.3" min="0" step="0.05"/>   
+                                    </div>  
+                                </div>                          
+                                <div class="form-group form-row">
+                                    <label for="swarmMax" class="col">Max initial value</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmMax" value="10"/>  
+                                    </div>    
+                                </div>                         
+                                <div class="form-group form-row">
+                                    <label for="swarmMin" class="col">Min initial value</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="swarmMin" value="-10"/>
+                                    </div>
+                                </div> 
+                            </div> 
+                        </div>  
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="form-group">
+                        <label>Approximating function</label>
+                        <input id="fitFunction" class="form-control" type="text" value="a1/(a2+exp(-a3*x))+a4">
+                    </div>
+                    <div class="form-group">
+                        <label for="valueTable">Table</label>
+                        <textarea id="valueTable" class="form-control" style="height:240px">
+0,0.021592459,
+1, 0.020293111,
+2, 0.021807906,
+3, 0.023803297,
+4, 0.025208132,
+5, 0.025414957,
+6, 0.024621282,
+7, 0.020973705,
+8, 0.015752802,
+9, 0.01116804,
+10, 0.008578277,
+11, 0.006581877,
+12, 0.005171723,
+13, 0.004545205,
+14, 0.00414512,
+15, 0.004343112,
+16, 0.005238155,
+17, 0.007251939,
+18, 0.012543656,
+19, 0.028067132,
+20, 0.091342277,
+21, 0.484081092,
+22, 0.870378324,
+23, 0.939513128,
+24, 0.960926994,
+25, 0.968623763,
+26, 0.971263883,
+27, 0.972285819,
+28, 0.971898742,
+29, 0.972691859,
+30, 0.971734812,
+31, 0.97234454,
+32, 0.97150339,
+33, 0.970857997,
+34, 0.970553866,
+35, 0.969671404
+                        </textarea>
+                    </div>
+                    <button type="button" id="runFit" class="btn btn-primary mt-2 form-control" >Fit</button>
+                </div>
+                <div id="generate" class="container">
+                    <div class="form-row form-group">
+                    <div class="col">
+                        Generate table values from function:
+                    </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="originalFunction">Expression</label>
+                        <input id="originalFunction" class="form-control" type="text" value = "x*x+6">
+                    </div>
+                    <div class="form-row form-group">
+                        <label class="col" for="functionValues">Number of values</label>
+                        <div class="col">
+                            <input type="number" class="form-control" id="functionValues" value="100" min="10" max="1000" step="1"/>
+                        </div>
+                    </div>
+                    <div class="form-row form-group ">
+                        <label class="col" for="minRange">Min</label>
+                        <div class="col">
+                            <input type="number" class="form-control" id="minRange" value="0" min="-1000" max="1000" step="1"/>
+                        </div>
+                    </div>
+                    <div class="form-row form-group ">
+                        <label class="col" for="maxRange">Max</label>
+                        <div class="col">
+                            <input type="number" class="form-control" id="maxRange" value="10" min="-1000" max="1000" step="1"/>
+                        </div>
+                    </div>
+                    <div class="form-group form-row">
+                        <label for="noise" class="col">Amplitude of additive noise</label>
+                        <div class="col">
+                            <input type="number" class="form-control" id="noise" value="0.1" min="0" max="1000" step="0.1"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="runGenerate" class="btn btn-primary mt-2 form-control">Generate</button>
+                        <button type="button" id="runPlot" class="btn btn-primary mt-2 form-control">Plot expression</button>
+                    </div>
+                </div>
+            </div>
+            <div class="rightColumn d-flex flex-column">
+                <div id="plotContainer">
+                </div>
+                <div id="result">
+                    <textarea id="resultArea" readonly class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script defer src="./bundle.js">
+    </script>
+</body>
+</html>
