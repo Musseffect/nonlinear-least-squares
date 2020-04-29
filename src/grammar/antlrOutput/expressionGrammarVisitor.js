@@ -66,6 +66,12 @@ expressionGrammarVisitor.prototype.visitFunctionArguments = function(ctx) {
 };
 
 
+// Visit a parse tree produced by expressionGrammarParser#paramValue.
+expressionGrammarVisitor.prototype.visitParamValue = function(ctx) {
+  return this.visitChildren(ctx);
+};
+
+
 // Visit a parse tree produced by expressionGrammarParser#number.
 expressionGrammarVisitor.prototype.visitNumber = function(ctx) {
   return this.visitChildren(ctx);

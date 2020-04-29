@@ -2,7 +2,9 @@ import {
   OptimizerGradient,
   OptimizerNewton,
   OptimizerSwarm,
-  OptimizerGaussNewton} from "./optimizers.js";
+  OptimizerGaussNewton,
+  OptimizerFourier
+} from "./optimizers.js";
 import {compile} from "./compiler/compiler.js";
 import $ from "jquery";
 import 'bootstrap';
@@ -11,7 +13,103 @@ import {FunctionExpression,LeastSquaresExpression} from "./functionExpression.js
 $("#runPlot").click(plot);
 $("#runFit").click(fit);
 $("#runGenerate").click(generate);
+$('#runFitFourier').click(fitFourier);
 //plotExpression("x*x*x*sin(x)+2*2.0",-2,2,20);
+plotTable();
+function plotTable()
+{
+  let tableText = $("#valueTable").val();
+  let min = 10e8;
+  let max = -10e8;
+  let x=[];
+  let y=[];
+  tableText.split(",").forEach((item,index)=>
+  {
+    if(index%2==0)
+      x.push(parseFloat(item));
+    else
+      y.push(parseFloat(item));
+  });
+  x.forEach((item)=>{min = Math.min(min,item);max = Math.max(max,item);});
+  let result = ""; 
+  var data = [{ x: x, y: y, mode: 'markers', name: `plot of table values`}];
+  var layout = {
+    title:'Result',
+    width:0.9*$("#plotContainer").width(),
+    height:0.9*$("#plotContainer").height()
+  };
+  Plotly.newPlot('plotContainer', data, layout,{responsive:true});
+}
+function fitFourier()
+{
+
+  let tableText = $("#valueTable").val();
+  let min = 10e8;
+  let max = -10e8;
+  let x=[];
+  let y=[];
+  tableText.split(",").forEach((item,index)=>
+  {
+    if(index%2==0)
+      x.push(parseFloat(item));
+    else
+      y.push(parseFloat(item));
+  });
+  x.forEach((item)=>{min = Math.min(min,item);max = Math.max(max,item);});
+
+  
+  let harmonics = parseInt($("#fourierHarmonics").val());
+  let solution = OptimizerFourier.run(x,y,harmonics,max-min);//{a:[],b:[],a0:const}
+  
+  let result = "";
+  result+=`a0 = ${solution.a0}\n`;
+  for(let i=0;i<harmonics;i++)
+  {
+    result+=`a${i+1} = ${solution.a[i]}\n`;
+    result+=`b${i+1} = ${solution.b[i]}\n`;
+  }
+  $("#resultArea").val(result);
+  let points = parseInt($("#functionValues").val());
+  let xArray = [];
+  let yArray = [];
+  for(let i=0;i<points;i++)
+  {
+    let _x = min+(max-min)*i/(points-1);
+    let _y = OptimizerFourier.execSeries(solution.a,solution.b,solution.a0,max-min,_x);
+    xArray.push(_x);
+    yArray.push(_y);
+  }
+  let amp = [solution.a0];
+  let phase = [0];
+  let harmonicsArray = [0];
+  let aArray=[solution.a0];
+  let bArray = [0];
+  for(let i=0;i<harmonics;i++)
+  {
+    let a = solution.a[i];
+    let b = solution.b[i];
+    amp.push(Math.sqrt(a*a+b*b));
+    phase.push(Math.atan2(b,a));
+    aArray.push(a);
+    bArray.push(b);
+    harmonicsArray.push(i+1);
+  }
+  var data = [
+    { x: x, y: y, legendgroup:'values', mode: 'markers', name: 'plot of table values'},
+    { x: xArray, y: yArray, legendgroup:'values', mode:'lines', name:'forier'},
+    { x: harmonicsArray, y: amp, mode:'markers+lines',name:'amplitude',visible:"legendonly"},
+    { x: harmonicsArray, y: phase, mode:'markers+lines',name:'phase',visible:"legendonly"},
+    { x: harmonicsArray, y: aArray, mode:'markers+lines',name:'a',visible:"legendonly"},
+    { x: harmonicsArray, y: bArray, mode:'markers+lines',name:'b',visible:"legendonly"}
+
+  ];
+  var layout = {
+    title:'Result',
+    width:0.9*$("#plotContainer").width(),
+    height:0.9*$("#plotContainer").height()
+  };
+  Plotly.newPlot('plotContainer', data, layout,{responsive:true});
+}
 function plotExpression(text,min,max,points)
 {
     let compiledExp = compile(text,["x"],(errors)=>{
@@ -44,9 +142,20 @@ function plotExpression(text,min,max,points)
       yArray.push(y);
     }
     var data = [{ x: xArray, y: yArray, mode: 'lines+markers', name: `plot of f(x)=${text}`}];
-    var layout = {title:'Result'};
+    var layout = {
+      title:'Result',
+      width:0.9*$("#plotContainer").width(),
+      height:0.9*$("#plotContainer").height()
+    };
     Plotly.newPlot('plotContainer', data, layout,{responsive:true});
 }
+/*window.onresize = function()
+{
+  Plotly.relayout('plotContainer',{
+    width:0.9*$("#plotContainer").width(),
+    height:0.9*$("#plotContainer").height()
+  })
+}*/
 function solutionToString(s,parameters)
 {
   let result = "";
@@ -73,8 +182,9 @@ function runGD(exp,p0,x,y)
 function runGN(exp,p0,x,y)
 {
   let iterations = parseInt($("#gaussNewtonIterations").val());
+  let alpha=parseFloat($("#gaussNewtonAlpha").val());
   let errAbsTol = parseFloat($("#gaussNewtonErrAbsTol").val());
-  return OptimizerGaussNewton.run(exp,p0,x,y,iterations,errAbsTol);
+  return OptimizerGaussNewton.run(exp,p0,x,y,iterations,alpha,errAbsTol);
 }
 function runPS(exp,p0,x,y)
 {
@@ -85,7 +195,7 @@ function runPS(exp,p0,x,y)
   let phi_g = parseFloat($("#swarmPhi_g").val());
   let max = parseFloat($("#swarmMax").val());
   let min = parseFloat($("#swarmMin").val());
-  return OptimizerSwarm.run(exp,p0.length,x,y,iterations,particleCount,w,phi_p,phi_g,max,min);
+  return OptimizerSwarm.run(exp,p0,x,y,iterations,particleCount,w,phi_p,phi_g,max,min);
 }
 function solutionToTrace(expression,s,min,max,points,name)
 {
@@ -140,7 +250,7 @@ function fit()
   });
   x.forEach((item)=>{min = Math.min(min,item);max = Math.max(max,item);});
   let exp = new LeastSquaresExpression(compiledExp.expression,compiledExp.variableNames);
-
+  console.log(exp.print());
   let result = ""; 
   var traceXY = {
     x: x,
@@ -232,7 +342,7 @@ function generate()
     if(i!=0)
       values+=',\n';
     let x = min+(max-min)*i/(points-1);
-    let y = funcExpression.function.exec([x]) + Math.random()*noise;
+    let y = funcExpression.function.exec([x]) + (Math.random()*2-1)*noise;
     values += `${x.toFixed(4)},${y.toFixed(4)}`;
   }
   $("#valueTable").val(values);

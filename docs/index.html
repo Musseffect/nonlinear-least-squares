@@ -94,13 +94,19 @@
                                     <div class="col">
                                         <input type="checkbox" class="form-control" id="gaussNewton" checked/>
                                     </div>
-                                </div>                     
+                                </div>
                                 <div class="form-group form-row">
-                                    <label for="gaussNewtonIterations" class="col"> Iterations</label>
+                                    <label for="gaussNewtonIterations" class="col">Iterations</label>
                                     <div class="col">
                                         <input type="number" class="form-control" id="gaussNewtonIterations" value="50" min="1"/>   
                                     </div>
-                                </div>                     
+                                </div>
+                                <div class="form-group form-row">
+                                    <label for="gaussNewtonAlpha" class="col">Alpha</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="gaussNewtonAlpha" value="1" min="0" max=1/>   
+                                    </div>
+                                </div>
                                 <div class="form-group form-row">
                                     <label for="gaussNewtonErrAbsTol" class="col">ErrAbsTol</label>
                                     <div class="col">
@@ -121,7 +127,7 @@
                                 <div class="form-group form-row">
                                     <label for="particleSwarm" class="col">Use</label>
                                     <div class="col">
-                                        <input type="checkbox" class="form-control" id="particleSwarm" checked/>
+                                        <input type="checkbox" class="form-control" id="particleSwarm"/>
                                     </div>
                                 </div>
                                 <div class="form-group form-row">
@@ -157,13 +163,13 @@
                                 <div class="form-group form-row">
                                     <label for="swarmMax" class="col">Max initial value</label>
                                     <div class="col">
-                                        <input type="number" class="form-control" id="swarmMax" value="10"/>  
+                                        <input type="number" class="form-control" id="swarmMax" value="1"/>  
                                     </div>    
                                 </div>                         
                                 <div class="form-group form-row">
                                     <label for="swarmMin" class="col">Min initial value</label>
                                     <div class="col">
-                                        <input type="number" class="form-control" id="swarmMin" value="-10"/>
+                                        <input type="number" class="form-control" id="swarmMin" value="-1"/>
                                     </div>
                                 </div> 
                             </div> 
@@ -173,12 +179,13 @@
                 <div class="container">
                     <div class="form-group">
                         <label>Approximating function</label>
-                        <input id="fitFunction" class="form-control" type="text" value="a1/(a2+exp(-a3*x))+a4">
+                        <textarea id="fitFunction" class="form-control" placeholder="example: a{10}*x+b{20}+c*sin(x)">
+a1{1}/(a2{1}+exp(-a3{2}*pow(x,2)))+a4{0}</textarea>
                     </div>
                     <div class="form-group">
                         <label for="valueTable">Table</label>
-                        <textarea id="valueTable" class="form-control" style="height:240px">
-0,0.021592459,
+                        <textarea id="valueTable" class="form-control" style="height:240px" placeholder="x0,y0,x1,y1,...">
+0, 0.021592459,
 1, 0.020293111,
 2, 0.021807906,
 3, 0.023803297,
@@ -217,16 +224,19 @@
                         </textarea>
                     </div>
                     <button type="button" id="runFit" class="btn btn-primary mt-2 form-control" >Fit</button>
+                    <button type="button" id="runFitFourier" class="btn btn-primary mt-2 form-control" >Fit fourier series</button>
+                    <div class="form-group">
+                        <label for="fourierHarmonics">Number of harmonics</label>
+                        <div class="col">
+                            <input type="number" class="form-control" id="fourierHarmonics" value="4" min="1" max="100" step="1"/>
+                        </div>
+                    </div>
                 </div>
+                <hr style="width:100%;"/>
                 <div id="generate" class="container">
-                    <div class="form-row form-group">
-                    <div class="col">
-                        Generate table values from function:
-                    </div>
-                    </div>
                     <div class="form-group">
                         <label for="originalFunction">Expression</label>
-                        <input id="originalFunction" class="form-control" type="text" value = "x*x+6">
+                        <input id="originalFunction" class="form-control" type="text" value = "x*x+6" placeholder="example: x*5+sin(x)+10">
                     </div>
                     <div class="form-row form-group">
                         <label class="col" for="functionValues">Number of values</label>
@@ -253,8 +263,10 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <button type="button" id="runGenerate" class="btn btn-primary mt-2 form-control">Generate</button>
                         <button type="button" id="runPlot" class="btn btn-primary mt-2 form-control">Plot expression</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" id="runGenerate" class="btn btn-primary mt-2 form-control">Generate values from expression</button>
                     </div>
                 </div>
             </div>

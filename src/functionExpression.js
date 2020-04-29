@@ -42,15 +42,31 @@ export class LeastSquaresExpression
         this.function = compiler.compile(expression,variables);
         this.hessian = [];
         this.derivatives = this.parameters.map(element=>{
-            let derivativeExpression = expression.differentiate(element,epsilon);
+            let derivativeExpression = expression.differentiate(element,epsilon).simplify();
             this.parameters.forEach(parameter=>
                 {
-                    let der = derivativeExpression.differentiate(element,epsilon);
+                    let der = derivativeExpression.differentiate(parameter,epsilon).simplify();
                     this.hessian.push(compiler.compile(der,variables));
                 })
             return compiler.compile(derivativeExpression,variables);
         });
         this.size = this.parameters.length;
+    }
+    print()
+    {
+        let result = "function: \n";
+        result+= this.function.print(this.variableNames);
+        result+= "\nderivative: \n"
+        this.derivatives.forEach((der,index)=>
+        {
+            result+= `df/d${this.parameters[index]}: ${der.print(this.variableNames)}\n`;
+        });
+        this.hessian.forEach((der,index)=>{
+            let y = Math.floor(index/this.size);
+            let x = index%this.size;
+            result+= `df/d${this.parameters[y]}d${this.parameters[x]}: ${der.print(this.variableNames)}\n`;
+        });
+        return result;
     }
     f(x,p)//f(x,p)
     {

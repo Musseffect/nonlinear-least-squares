@@ -2,6 +2,59 @@ import RPNCompiler from "./compiler/rpnCompiler.js";
 import { vector } from "./vector";
 import { matrix } from "./matrix";
 
+export class OptimizerFourier
+{
+    static execSeries(a,b,a0,period,t)
+    {
+        let value = a0;
+        for(let i=0;i<a.length;i++)
+        {
+            let angle = 2*Math.PI*(i+1)*t/period;
+            value += a[i]*Math.cos(angle)+b[i]*Math.sin(angle);
+        }
+        return value;
+    }
+    static run(x,y,harmonics,period)
+    {
+        let m = new matrix(harmonics*2+1,harmonics*2+1);
+        let f = new vector(harmonics*2+1);
+        for(let i=0;i<x.length;i++)
+        {
+            f.set(0,f.get(0)+y[i]);
+            for(let j=0;j<harmonics;j++)
+            {
+                let angle = 2*Math.PI*(j+1)*x[i]/period;
+                let ca = Math.cos(angle);
+                let sa = Math.sin(angle);
+                let a = f.get(1+j) + ca*y[i];
+                f.set(1+j,a);
+                let b = f.get(1+j+harmonics) + sa*y[i];
+                f.set(1+j+harmonics,b);
+                m.set(0,0,x.length);
+                m.set(0,j+1,m.get(0,j+1)+ca);//first column
+                m.set(0,j+harmonics+1,m.get(0,j+harmonics+1)+sa);//first column
+                m.set(j+1,0,m.get(j+1,0)+ca);//first row
+                m.set(j+harmonics+1,0,m.get(j+harmonics+1,0)+sa);//first row
+                for(let k=0;k<harmonics;k++)
+                {
+                    let angle2 = 2*Math.PI*(k+1)*x[i]/period;
+                    let ca2 = Math.cos(angle2);
+                    let sa2 = Math.sin(angle2);
+                    m.set(k+1,j+1,m.get(k+1,j+1)+ca2*ca);
+                    m.set(k+harmonics+1,j+1,m.get(k+harmonics+1,j+1)+sa2*ca);
+                    m.set(k+1,j+harmonics+1,m.get(k+1,j+harmonics+1)+ca2*sa);
+                    m.set(k+harmonics+1,j+harmonics+1,m.get(k+harmonics+1,j+harmonics+1)+sa2*sa);
+                }
+            }
+        }
+        let ab = matrix.solve(m,f);
+        return {
+            a0:ab.data[0],
+            a:ab.data.slice(1,1+harmonics),
+            b:ab.data.slice(1+harmonics)
+        };
+    }
+}
 
 export class OptimizerGradient
 {
@@ -22,8 +75,8 @@ export class OptimizerGradient
                 break;
             }
             dp.scaleSelf(-rate/x.length*2.0);
-            for(let i=0;i<size;i++)
-                p[i]+=dp.get(i);
+            for(let k=0;k<size;k++)
+                p[k]+=dp.get(k);
         }
         let error = 0.0;
         for(let i=0;i<x.length;i++)
@@ -35,7 +88,7 @@ export class OptimizerGradient
 }
 export class OptimizerGaussNewton
 {
-    static run(f,p0,x,y,iterations,errAbsTol)
+    static run(f,p0,x,y,iterations,alpha,errAbsTol)
     {
         let p = p0.slice();
         let size = p0.length;
@@ -46,15 +99,16 @@ export class OptimizerGaussNewton
            let error = 0.0;
            for(let j=0;j<x.length;j++)
            {
-               let jac = f.dfdp(x[j],p);
-               let dy = y[j] - f.f(x[j],p);
-               error+=dy*dy;
-               _f.addSelf(jac.scale(dy));
+               let r = f.f(x[j],p) - y[j];
+               let drdp = f.dfdp(x[j],p);
+               error+=r*r;
+               _f.addSelf(drdp.scale(-r*alpha));
                for(let k=0;k<size;k++)
                {
                    for(let l=0;l<size;l++)
                    { 
-                    m.set(l,k,m.get(l,k)+jac.get(k)*jac.get(l));
+                       let val = m.get(l,k)+drdp.get(k)*drdp.get(l)
+                        m.set(l,k,val);
                    }
                }
            }
@@ -94,7 +148,7 @@ export class OptimizerNewton
                     for(let l=0;l<size;l++)
                     {
                         let value = hessian.get(l,k);
-                        value += dfdp.get(l)*dfdp.get(k)+fy*dfdpdp.get(l,k);//TODO check indexes
+                        value += dfdp.get(l)*dfdp.get(k)+fy*dfdpdp.get(l,k);//TODO check indicies
                         hessian.set(l, k, value);
                     }
                     let value = dedp.get(k);
@@ -136,13 +190,14 @@ export class OptimizerSwarm
         }
         return error;
     }
-    static run(f,size,x,y,iterations,particleCount,w,phi_p,phi_g,max,min)
+    static run(f,p0,x,y,iterations,particleCount,w,phi_p,phi_g,max,min)
     {
         let bestSolution = 0;
         let bestIndividualSolutions=[];
         let bestValue=10e8;
         let particles = [];
         let  solutions = [];
+        let size = p0.length;
         //init
         for(let j=0;j<particleCount;j++)
         {
@@ -150,7 +205,7 @@ export class OptimizerSwarm
             let vel=[];
             for (let i = 0; i < size; i++)
             {
-                pos.push(Math.random()*(max-min)+min);
+                pos.push(Math.random()*(max-min)+min + p0[i]);
                 vel.push(Math.random() * 2. - 1.);
             }
             let err = OptimizerSwarm.errValue(f, pos, x, y);
@@ -191,110 +246,3 @@ export class OptimizerSwarm
         return {solution:bestIndividualSolutions[bestSolution].p,error:bestValue};
     }
 }
-
-/*
-//f(x,p)
-//initial values for pi
-//arrays of x and y 
-function optimizeNumerical(f, p, x, y, iterations, gamma,epsilon)
-{
-    for (let i = 0; i < iterations; i++)
-    {
-        let fxip = [];
-        pOld = p.slice();
-        for (let j = 0; j < x.length() ; j++)
-        {
-            fxip.push(f(x[j], pOld));
-        }
-        for (let j = 0; j < p.length() ; j++)
-        {
-            dpj = 0.0;
-            pOld[j] += epsilon;
-            for (let k = 0; k < x.length() ; k++)
-            {
-                dpj += 2.*(fxip[k]-y[k])*(f(x[k],pOld)-fxip[k])/epsilon;
-            }
-            pOld[j] -= epsilon;
-            p[j]-=gamma*dpj;
-        }
-    }
-    return p;
-}
-function optimizeAnalytic(f, dfdp, p, x, y, iterations, gamma) {
-    for (let i = 0; i < iterations; i++) {
-        let fxip = [];
-        pOld = p.slice();
-        for (let j = 0; j < x.length() ; j++) {
-            fxip.push(f(x[j], pOld));
-        }
-        for (let j = 0; j < p.length() ; j++) {
-            dpj = 0.0;
-            for (let k = 0; k < x.length() ; k++) {
-                dpj += 2. * (fxip[k] - y[k]) * dfdp[j](x[k],pOld);
-            }
-            p[j] -= gamma * dpj;
-        }
-    }
-    return p;
-}
-function errValue(f,p,x,y)
-{
-    let value=0.0;
-    for(let i=0;i<x.length();i++)
-    {
-        value+=Math.pow(f(x[i],p)-y[i],2);
-    }
-    return value;
-}
-function optimizeSwarm(f, dfdp,x,y,iterations,particleCount,w,phi_p,phi_g,max,min) {
-    let bestSolution = undefined;
-    let bestIndividualSolutions=[];
-    let bestValue=10e8;
-    let v = [];
-    let particles = [];
-    //init
-    for(let j=0;j<particleCount;j++)
-    {
-        let pos=[];
-        let vel=[];
-        for (let i = 0; i < p.length() ; i++)
-        {
-            pos.push(Math.random()*(max[i]-min[i])+min[i]);
-            vel.push(Math.random() * 2. - 1.);
-        }
-        let err = errValue(f, pos, x, y);
-        if (err < bestValue)
-        {
-            bestSolution = j;
-            bestValue = err;
-        }
-        particles.push({p:pos,v:vel});
-        bestIndividualSolutions.push({p:pos.splice(),value:err});
-    }
-    //while true
-    for (let i = 0; i < iterations; i++)
-    {
-        for (let j = 0; j < particleCount; j++) {
-            let rp = Math.random();
-            let rg = Math.random();
-            let particle = particles[j];
-            let solution = bestIndividualSolutions[j];
-            for (let k = 0; k < p.length() ; k++) {
-                particle.v[k] = particle.v[k] * w +
-                    phi_g * rg * (bestSolution[k] - particle.p[k]) +
-                    phi_p * rp * (solution.p[k] - particle.p[k]);
-                particle.p[k] += particle.v[k];
-            }
-            let err = errValue(f, particle.p[k], x, y);
-            if (err < bestValue) {
-                bestSolution = j;
-                bestValue = err;
-            }
-            if (err < solution.value) {
-                solution.p = particle.p.splice();
-                solution.value = err;
-            }
-        }
-    }
-    return particles[bestSolution].p;
-}*/

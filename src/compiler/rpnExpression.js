@@ -25,7 +25,7 @@ export default class RPNExpression
 			{
 				case item instanceof Negation:
 					{
-						let operand = operands.Pop();
+						let operand = operands.pop();
 						if (operand.type < StackElementType._Negation)
 							operands.push(
 							{
@@ -50,7 +50,7 @@ export default class RPNExpression
 							right.string = "(" + right.string + ")";
 						operands.push(
 						{
-							type: StackElementType.Addition,
+							type: StackElementType._Addition,
 							string: left.string + "+" + right.string
 						});
 						break;
@@ -66,7 +66,7 @@ export default class RPNExpression
 						operands.push(
 						{
 							type: StackElementType._Addition,
-							string: left.String + "-" + right.String
+							string: left.string + "-" + right.string
 						});
 						break;
 					}
@@ -91,7 +91,7 @@ export default class RPNExpression
 						let left = operands.pop();
 						if (left.type < StackElementType._Multiplication)
 							left.string = "(" + left.string + ")";
-						if (right.type < StackElementType._Multiplication)
+						if (right.type <= StackElementType._Multiplication)
 							right.string = "(" + right.string + ")";
 						operands.push(
 						{

@@ -7,11 +7,13 @@ expression: func=ID LPAREN functionArguments RPAREN	#FunctionExpression
 	| left=expression op=(DIVISION|ASTERISK) right=expression	#BinaryOperatorExpression
 	| left=expression op=(PLUS|MINUS) right=expression	#BinaryOperatorExpression
 	| LPAREN expression RPAREN #BracketExpression
-	| id=ID LCRLPAREN value=number RCRLPAREN  #ParameterExpression
+	| id=ID LCRLPAREN value=paramValue RCRLPAREN  #ParameterExpression
 	| id=ID #IdentifierExpression
 	| value=number	#ConstantExpression
 	;
 functionArguments: expression (COMMA expression)* | ;
+
+paramValue: (PLUS|MINUS)?(FLOAT|INT);
 
 number		: value=(FLOAT|INT);
 

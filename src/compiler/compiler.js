@@ -29,8 +29,7 @@ export function compile(expressionText, predefinedVariables = [], onErrors=(erro
         onErrors(errors);
         return null;
     }
-    
-    console.log(tree.toStringTree(parser.ruleNames));
+    //console.log(tree.toStringTree(parser.ruleNames));
     
     let expression = visitor.start(tree,listener,predefinedVariables);
     if(errors.length>0)

@@ -1,3 +1,4 @@
+import { functionDictionary } from "./functions.js";
 
 
 export const NodeType = {
@@ -9,83 +10,6 @@ export const NodeType = {
 	_Multiplication : 5,
 	_Division : 6,
 	_Negation : 7,
-}
-
-
-export const functionDictionary = 
-{
-	sin:{
-		exec:function(args)
-		{
-			return Math.sin(args[0]);
-		},
-		args:1,
-		name:'sin',
-		derivatives:[
-			function(args)
-			{
-				return new FunctionNode("cos", args);
-			}
-		]
-	},
-	cos:{
-		exec:function(args)
-		{
-			return Math.cos(args[0]);
-		},
-		args:1,
-		name:'cos',
-		derivatives:[
-			function(args)
-			{
-				return new NegationNode(new FunctionNode("sin", args));
-			}
-		]
-	},
-	ln:{
-		exec:function(args)
-		{
-			return Math.ln(args[0]);
-		},
-		args:1,
-		name:'ln',
-		derivatives:[
-			function(args)
-			{
-				return new DivisionNode(new ConstantNode(1.0),args[0]);
-			}
-
-		]
-	},
-	pow:{
-		exec:function(args){
-			return Math.pow(args[0],args[1]);
-		},
-		args:2,
-		name:'pow',
-		derivatives:[
-			function(args)
-			{
-				//TODO
-			},
-			function(args){
-				//TODO
-			}
-		]
-	},
-	exp:{
-		exec:function(args){
-			return Math.exp(args[0]);
-		},
-		args:1,
-		name:'exp',
-		derivatives:[
-			function(args)
-			{
-				return new FunctionNode("exp",args);
-			}
-		]
-	}
 }
 
 export class FunctionNode
@@ -101,6 +25,10 @@ export class FunctionNode
 		if(this.function.args!=args.length)
 			throw "Incorrect number of arguments in function "+functionName;
 	}
+	clone()
+	{
+		return new FunctionNode(this.functionName,this.args.map((item)=>{return item.clone()}));
+	}
 	execute(variableValues)
 	{
 		let args = this.args.map((item)=>
@@ -113,7 +41,7 @@ export class FunctionNode
 		if(this.function.derivatives===undefined)//use backward difference
 		{
 			let argumentsBackward = this.args.slice();
-			argumentsBackward[index] = new SubtractionNode(argumentsBackward[index],epsilon);
+			argumentsBackward[index] = new SubtractionNode(argumentsBackward[index],new ConstantNode(epsilon));
 			return new DivisionNode(new SubtractionNode(
 				new FunctionNode(this.functionName, this.args),
 				new FunctionNode(this.functionName, argumentsBackward),
@@ -154,6 +82,24 @@ export class FunctionNode
 		);
 		return root;
 	}
+	simplify()
+	{
+		let constantArgs = true;
+		let args = this.args.map((item)=>
+			{
+				let _item = item.simplify();
+				constantArgs = constantArgs && (item instanceof ConstantNode);
+				return _item;
+			}
+		);
+		if(constantArgs)
+		{
+			let constArgs = args.map((item)=>{return item.value;});
+			return new ConstantNode(this.function.exec(constArgs));
+		}
+		this.args = args;
+		return this;
+	}
 }
 export class ConstantNode
 {
@@ -161,6 +107,10 @@ export class ConstantNode
 	{
 		this.type = NodeType._Constant
 		this.value = value;
+	}
+	clone()
+	{
+		return new ConstantNode(this.value);
 	}
 	differentiate(variable, epsilon)
 	{
@@ -170,6 +120,10 @@ export class ConstantNode
 	{
 		return this;
 	}
+	simplify()
+	{
+		return new ConstantNode(this.value);	
+	}
 }
 export class VariableNode
 {
@@ -177,6 +131,10 @@ export class VariableNode
 	{
 		this.type = NodeType._Variable;
 		this.name = name;
+	}
+	clone()
+	{
+		return new VariableNode(this.name);
 	}
 	differentiate(variable, epsilon)
 	{
@@ -188,12 +146,20 @@ export class VariableNode
 	{
 		return new ConstantNode(variableValues[this.name]);
 	}
+	simplify()
+	{
+		return new VariableNode(this.name);
+	}
 }
 export class NegationNode{
 	constructor(inner)
 	{
 		this.inner = inner;
 		this.type = NodeType._Negation;
+	}
+	clone()
+	{
+		return new NegationNode(this.inner.clone());
 	}
 	differentiate(variable, epsilon)
 	{
@@ -203,6 +169,17 @@ export class NegationNode{
 	{
 		return new ConstantNode(-this.inner.execute(variableValues).value);
 	}
+	simplify()
+	{
+		let node = this.inner.simplify();
+		if(node instanceof ConstantNode)
+			return new ConstantNode(-node.value);
+		if(node instanceof NegationNode)
+		{
+			return node.inner;
+		}
+		return new NegationNode(node);
+	}
 }
 export class AdditionNode
 {
@@ -211,6 +188,10 @@ export class AdditionNode
 		this.left = left;
 		this.right = right;
 		this.type = NodeType._Addition;
+	}
+	clone()
+	{
+		return new AdditionNode(this.left.clone(),this.right.clone());
 	}
 	differentiate(variable, epsilon)
 	{
@@ -223,6 +204,25 @@ export class AdditionNode
 	{
 		return new ConstantNode(this.left.execute(variableValues).value+this.right.execute(variableValues).value);
 	}
+	simplify()
+	{
+		let l = this.left.simplify();
+		let r = this.right.simplify();
+		if(l instanceof ConstantNode)
+		{
+			if(r instanceof ConstantNode)
+			{
+				return new ConstantNode(l.value + r.value);
+			}
+			if(Math.abs(l.value)==0)
+				return r;
+		}else if(r instanceof ConstantNode)
+		{
+			if(Math.abs(r.value)==0.0)
+				return l;
+		}
+		return new AdditionNode(l,r);
+	}
 }
 export class SubtractionNode{
 	constructor(left,right)
@@ -230,6 +230,10 @@ export class SubtractionNode{
 		this.left = left;
 		this.right = right;
 		this.type = NodeType._Subtraction;
+	}
+	clone()
+	{
+		return new SubtractionNode(this.left.clone(),this.right.clone());
 	}
 	differentiate(variable, epsilon)
 	{
@@ -242,6 +246,25 @@ export class SubtractionNode{
 	{
 		return new ConstantNode(this.left.execute(variableValues).value-this.right.execute(variableValues).value);
 	}
+	simplify()
+	{
+		let l = this.left.simplify();
+		let r = this.right.simplify();
+		if(l instanceof ConstantNode)
+		{
+			if(r instanceof ConstantNode)
+			{
+				return new ConstantNode(l.value - r.value);
+			}
+			if(Math.abs(l.value)==0)
+				return new NegationNode(r);
+		}else if(r instanceof ConstantNode)
+		{
+			if(Math.abs(r.value)==0)
+				return l;
+		}
+		return new SubtractionNode(l,r);
+	}
 }
 export class MultiplicationNode{
 	constructor(left,right)
@@ -250,15 +273,19 @@ export class MultiplicationNode{
 		this.right = right;
 		this.type = NodeType._Multiplication;
 	}
+	clone()
+	{
+		return new MultiplicationNode(this.left.clone(),this.right.clone());
+	}
 	differentiate(variable, epsilon)
 	{
 		return new AdditionNode(
 				new MultiplicationNode(
 					this.left.differentiate(variable, epsilon),
-					this.right
+					this.right.clone()
 				),
 				new MultiplicationNode(
-					this.left,
+					this.left.clone(),
 					this.right.differentiate(variable, epsilon)
 				)
 			);
@@ -266,6 +293,33 @@ export class MultiplicationNode{
 	execute(variableValues)
 	{
 		return new ConstantNode(this.left.execute(variableValues).value*this.right.execute(variableValues).value);
+	}
+	simplify()
+	{
+		let l = this.left.simplify();
+		let r = this.right.simplify();
+		if(l instanceof ConstantNode)
+		{
+			if(r instanceof ConstantNode)
+			{
+				return new ConstantNode(l.value * r.value);
+			}
+			if(Math.abs(l.value)==0.0)
+				return l;
+			if(l.value == 1)
+				return r;
+			if(l.value == -1)
+				return new NegationNode(r);
+		}else if(r instanceof ConstantNode)
+		{
+			if(Math.abs(r.value)==0.0)
+				return r;
+			if(r.value == 1)
+				return l;
+			if(l.value == -1)
+				return new NegationNode(l);
+		}
+		return new MultiplicationNode(l,r);
 	}
 }
 export class DivisionNode{
@@ -275,8 +329,28 @@ export class DivisionNode{
 		this.right = right;
 		this.type = NodeType._Division;
 	}
+	clone()
+	{
+		return new DivisionNode(this.left.clone(),this.right.clone());
+	}
 	differentiate(variable, epsilon)
 	{
+		return new SubtractionNode(
+			new DivisionNode(
+				this.left.differentiate(variable,epsilon),
+				this.right.clone(),
+			),
+			new MultiplicationNode(
+				this.right.differentiate(variable,epsilon),
+				new DivisionNode(
+					this.left.clone(),
+					new FunctionNode("pow",[
+						this.right.clone(),new ConstantNode(2)]
+					)
+				)
+			)
+		);
+		/*
 		return new DivisionNode
 		(
 			new SubtractionNode
@@ -298,11 +372,31 @@ export class DivisionNode{
 				this.right,
 				this.right
 			),
-		);
+		);*/
 	}
 	execute(variableValues)
 	{
 		return new ConstantNode(this.left.execute(variableValues).value/this.right.execute(variableValues).value);
 	}
+	simplify()
+	{
+		let l = this.left.simplify();
+		let r = this.right.simplify();
+		if(l instanceof ConstantNode)
+		{
+			if(Math.abs(l.value)==0.0)
+				return l;
+			if(r instanceof ConstantNode)
+			{
+				return new ConstantNode(l.value / r.value);
+			}
+		}else if(r instanceof ConstantNode)
+		{
+			if(r.value == 1)
+				return l;
+			if(r.value == -1)
+				return new NegationNode(l);
+		}
+		return new DivisionNode(l,r);
+	}
 }
-

@@ -53,12 +53,12 @@ class Visitor extends expressionGrammarVisitor.expressionGrammarVisitor
     }
     visitParameterExpression(ctx)
     {
-        let id = ctx.getText();
+        let id = ctx.id.text;
         if(this.variables[id]===undefined)
         {
             this.variables[id] = this.variableNames.length;
             this.variableNames.push(id);
-            this.parameters[id] = this.visitNumber(ctx.value).value;
+            this.parameters[id] = parseFloat(ctx.value.getText());
         }
         return new VariableNode(id);
     }
