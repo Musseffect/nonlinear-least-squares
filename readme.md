@@ -1,6 +1,6 @@
 Simple tool for nonlinear least squares with arithmetic expressions and symbolic differentiation.
 
-"x" is reserved symbol for independent variable, every other identifier will be treated as an unknown parameter.
+Symbol "x" is reserved for independent variable, every other identifier will be treated as an unknown parameter.
 
 You can assign initial value for parameter with curly brackets, i. e. "p1{3.25}".
 
@@ -38,4 +38,4 @@ List of supported mathematical functions:
 * max(a,b)*
 * abs(a,b)*
 
-\* - use numerical differentiation, because they are not continuous  
+\* - uses numerical differentiation, because they are not continuous  
