@@ -1,190 +1,190 @@
-﻿<html>
-<head>
-    <title>Non-linear least squares</title>
-    <link rel="stylesheet" type="text/css" href="./main.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <meta charset="utf-8" content=" text/html" http-equiv="content-type" />
-</head>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<body>
-    <div class="parentControl container-fluid">
-        <div class="parentRow d-flex flex-row">
-            <div class="leftColumn d-flex flex-column">
-                <div id="methods" class="container">
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            Gradient descent
-                            </button>
+<html>
+    <head>
+        <title>Non-linear least squares</title>
+        <link rel="stylesheet" type="text/css" href="./main.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+        <meta charset="utf-8" content=" text/html" http-equiv="content-type" />
+    </head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script
+  src="https://code.jquery.com/jquery-3.5.1.min.js"
+  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+  crossorigin="anonymous"></script>
+    <body>
+        <div id="container">
+            <div id="mainAreaContainer">
+                <div id="controlsColumn">
+                    <div class="tab-control" id="fitting-type">
+                        <div class="horizontal-tab-header-panel">
+                            <div class="top-tab-button active" data-role="tab" data-tab="curve-fitting" data-parent="fitting-type">Curve fitting</div>
+                            <div class="top-tab-button" data-role="tab" data-tab="fourier-series" data-parent="fitting-type">Fourier series</div>
                         </div>
-                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#methods">
-                            <div class="card-body">
-                                <div class="form-group form-row">
-                                    <label for="gradientDescent"  class="col">Use</label>
-                                    <div class="col">
-                                        <input type="checkbox" id="gradientDescent" class="form-control" checked/>
+                        <div class="tab-content-panel">
+                            <div class="tab-item-panel show" data-role="tab-item" id="curve-fitting" data-parent="fitting-type">
+                                <div class="form">
+                                    <div class="form-row">
+                                        <label class="form-col">Plot resolution</label>
+                                        <input type="number" id="curve-plot-resolution" class="input form-col" value="100" min="2" max="10000">
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="form-col">Approximating function</label>
+                                    </div>
+                                    <div class="form-row">
+                                        <textarea id="curve-function-area" class="input" placeholder="Example: a{10}*x+b{20}+c*sin(x)">a1{1}*erf((x+a3{-21})*a2{1})+a4{0.5}</textarea>
+                                    </div>
+                                    <div class="form-row">
+                                        <button id="curve-fit" class="button form-col">Fit</button>
+                                    </div>
+                                    <div class="tab-control" id="methods">
+                                        <div class="vertical-tab-header-panel">
+                                            <div class="top-tab-button active" data-role="tab" data-tab="gradient-descent" data-parent="methods">Gradient descent method</div>
+                                            <div class="top-tab-button" data-role="tab" data-tab="newton" data-parent="methods">Newton's method</div>
+                                            <div class="top-tab-button" data-role="tab" data-tab="gauss-newton" data-parent="methods">Gauss-Newton method</div>
+                                            <div class="top-tab-button" data-role="tab" data-tab="particle-swarm" data-parent="methods">Particle swarm method</div>
+                                        </div>
+                                        <div class="tab-content-panel">
+                                            <div class="tab-item-panel show" data-role="tab-item" id="gradient-descent" data-parent="methods">
+                                                <div class="form-row">
+                                                    <label class="form-col">Use</label>
+                                                    <input type="checkbox" id="gradient-descent-use" class="input form-col" checked>
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Iterations</label>
+                                                    <input type="number" id="gradient-descent-iterations" class="input form-col" value="75" min="1" max="500" step="1">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Rate</label>
+                                                    <input type="number" id="gradient-descent-rate" class="input form-col" value="0.05" min="0" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Error Abs. Tol.</label>
+                                                    <input type="number" id="gradient-descent-err-abs-tol"  class="input form-col" value="0" min="0" step="0.1">
+                                                </div>
+                                            </div>
+                                            <div class="tab-item-panel" data-role="tab-item" id="newton" data-parent="methods">
+                                                <div class="form-row">
+                                                    <label class="form-col">Use</label>
+                                                    <input type="checkbox" id="newton-use" class="input form-col" checked>
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Iterations</label>
+                                                    <input type="number" id="newton-iterations" class="input form-col" value="50" min="1" max="500" step="1">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Alpha</label>
+                                                    <input type="number" id="newton-alpha" class="input form-col" value="0.9" min="0" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Error Abs. Tol.</label>
+                                                    <input type="number" id="newton-err-abs-tol"  class="input form-col" value="0" min="0" step="0.1">
+                                                </div>
+                                            </div>
+                                            <div class="tab-item-panel" data-role="tab-item" id="gauss-newton" data-parent="methods">
+                                                <div class="form-row">
+                                                    <label class="form-col">Use</label>
+                                                    <input type="checkbox" id="gauss-newton-use" class="input form-col" checked>
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Iterations</label>
+                                                    <input type="number" id="gauss-newton-iterations"  class="input form-col" value="50" min="1" max="500" step="1">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Alpha</label>
+                                                    <input type="number" id="gauss-newton-alpha"  class="input form-col" value="0.95" min="0" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Error Abs. Tol.</label>
+                                                    <input type="number" id="gauss-newton-err-abs-tol"  class="input form-col" value="0" min="0" step="0.1">
+                                                </div>
+                                            </div>
+                                            <div class="tab-item-panel" data-role="tab-item" id="particle-swarm" data-parent="methods">
+                                                <div class="form-row">
+                                                    <label class="form-col">Use</label>
+                                                    <input type="checkbox" id="particle-swarm-use" class="input form-col">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Iterations</label>
+                                                    <input type="number" id="particle-swarm-iterations" class="input form-col" value="30" min="1" max="500" step="1">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Particles</label>
+                                                    <input type="number" id="particle-swarm-particles" class="input form-col" value="15" min="1" max="100" step="1">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">W</label>
+                                                    <input type="number" id="particle-swarm-w" class="input form-col" value="0" min="0.3" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">&phi; p</label>
+                                                    <input type="number" id="particle-swarm-phi-p" class="input form-col" value="0" min="0.3" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">&phi; g</label>
+                                                    <input type="number" id="particle-swarm-phi-g" class="input form-col" value="0" min="0.3" max="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Max initial value</label>
+                                                    <input type="number" id="particle-swarm-max" class="input form-col" value="1" step="0.05">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Min initial value</label>
+                                                    <input type="number" id="particle-swarm-min" class="input form-col" value="-1" step="0.05">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group form-row">
-                                    <label for="gradDescIterations" class="col">Iterations</label>
-                                    <div class="col">
-                                        <input type="number" id="gradDescIterations"  class="form-control" value="50" min="1"/>
+                            </div>
+                            <div class="tab-item-panel" data-role="tab-item" id="fourier-series" data-parent="fitting-type">
+                                <div class="form">
+                                    <div class="form-row">
+                                        <label class="form-col">Plot resolution</label>
+                                        <input type="number" id="fourier-plot-resolution" class="input form-col" value="100" min="2" max="10000">
                                     </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="gradDescRate" class="col">Rate</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="gradDescRate" value="0.01" min="0" max="1" step="0.05"/>
+                                    <div class="form-row">
+                                        <label class="form-col">Number of harmonics</button>
+                                        <input class="input form-col" type="number" id="fourier-harmonics" value="6" min="1">
                                     </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="gradErrAbsTol" class="col">ErrAbsTol</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="gradErrAbsTol" value="0" min="0" />
+                                    <div class="form-row">
+                                        <button id="fourier-fit" class="button form-col">Fit</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header" id="headingTwo">
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            Newton's method
-                            </button>
+                    
+                    <div class="form">
+                        <div class="form-row">
+                            <label class="form-col">Expression</label>
                         </div>
-                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#methods">  
-                            <div class="card-body">              
-                                <div class="form-group form-row">
-                                    <label for="newton" class="col">Use</label>
-                                    <div class="col">
-                                        <input type="checkbox" class="form-control" id="newton" checked/>
-                                    </div>
-                                </div>                   
-                                <div class="form-group form-row">
-                                    <label for="newtonIterations" class="col">Iterations</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="newtonIterations" value="50" min="1"/>
-                                    </div>
-                                </div>              
-                                <div class="form-group form-row">
-                                    <label for="newtonAlpha" class="col">Alpha</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="newtonAlpha" value="0.95" min="0" max="1" step="0.05"/>
-                                    </div>
-                                </div>              
-                                <div class="form-group form-row">
-                                    <label for="newtonFAbsTol" class="col">FAbsTol</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="newtonFAbsTol" value="0" min="0"/>
-                                    </div>
-                                </div>  
-                            </div>
+                        <div class="form-row">
+                            <input id="expression" type="text" class="input form-col" placeholder="Example: 2*(x+4)+5*sin(x-3)" value="x*x+sin(pi()*x)">
                         </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header" id="headingThree">
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            Gauss-Newton method
-                            </button>
+                        <div class="form-row">
+                            <button id="plot-exp" class="button form-col">Plot expression</button>
                         </div>
-                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#methods">
-                            <div class="card-body">
-                                <div class="form-group form-row">
-                                    <label for="gaussNewton" class="col">Use</label>
-                                    <div class="col">
-                                        <input type="checkbox" class="form-control" id="gaussNewton" checked/>
-                                    </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="gaussNewtonIterations" class="col">Iterations</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="gaussNewtonIterations" value="50" min="1"/>   
-                                    </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="gaussNewtonAlpha" class="col">Alpha</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="gaussNewtonAlpha" value="1" min="0" max=1/>   
-                                    </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="gaussNewtonErrAbsTol" class="col">ErrAbsTol</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="gaussNewtonErrAbsTol" value="0" min="0"/>
-                                    </div>
-                                </div>   
-                            </div> 
+                        <div class="form-row">
+                            <button id="generate-values" class="button form-col">Generate table values from expression</button>
                         </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header" id="headingFour">
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                            Particle swarm method
-                            </button>
+                        <div class="form-row">
+                            <label class="form-col">Resolution</label>
+                            <input type="number" id="resolution" value="100" min="2" max="1000" class="input form-col">
                         </div>
-                        <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#methods">   
-                            <div class="card-body">              
-                                <div class="form-group form-row">
-                                    <label for="particleSwarm" class="col">Use</label>
-                                    <div class="col">
-                                        <input type="checkbox" class="form-control" id="particleSwarm"/>
-                                    </div>
-                                </div>
-                                <div class="form-group form-row">
-                                    <label for="swarmIterations" class="col">Iterations</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmIterations" value="30" min="1"/>  
-                                    </div>
-                                </div>                             
-                                <div class="form-group form-row">
-                                    <label for="swarParticles" class="col">Particles</label>
-                                    <div  class="col">
-                                        <input type="number" class="form-control" id="swarParticles" value="15" min="0"/>  
-                                    </div>
-                                </div>                             
-                                <div class="form-group form-row">
-                                    <label for="swarmW" class="col">W</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmW" value="0.3" min="0" step="0.05"/>     
-                                    </div>
-                                </div>                          
-                                <div class="form-group form-row">
-                                    <label for="swarmPhi_p" class="col">&phi; p</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmPhi_p" value="0.3" min="0" step="0.05"/>   
-                                    </div>
-                                </div>                            
-                                <div class="form-group form-row">
-                                    <label for="swarmPhi_g" class="col">&phi; g</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmPhi_g" value="0.3" min="0" step="0.05"/>   
-                                    </div>  
-                                </div>                          
-                                <div class="form-group form-row">
-                                    <label for="swarmMax" class="col">Max initial value</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmMax" value="1"/>  
-                                    </div>    
-                                </div>                         
-                                <div class="form-group form-row">
-                                    <label for="swarmMin" class="col">Min initial value</label>
-                                    <div class="col">
-                                        <input type="number" class="form-control" id="swarmMin" value="-1"/>
-                                    </div>
-                                </div> 
-                            </div> 
-                        </div>  
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="form-group">
-                        <label>Approximating function</label>
-                        <textarea id="fitFunction" class="form-control" placeholder="example: a{10}*x+b{20}+c*sin(x)">
-a1{1}/(a2{1}+exp(-a3{2}*pow(x,2)))+a4{0}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="valueTable">Table</label>
-                        <textarea id="valueTable" class="form-control" style="height:240px" placeholder="x0,y0,x1,y1,...">
+                        <div class="form-row">
+                            <label class="form-col">Min</label>
+                            <input type="number" id="max" value="-1" step="0.1" class="input form-col">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-col">Max</label>
+                            <input type="number" id="min" value="1" step="0.1" class="input form-col">
+                        </div>
+                        <div class="form-row">
+                            <label class="form-col">Amplitude of additive noise</label>
+                            <input id="noise-amp" type="number" value="0" step="0.1" min="0" class="input form-col">
+                        </div>
+                        <label class="form-row">Table values</label>
+                        <div class="form-row">
+                            <textarea id="table-area" class="input" placeholder="x0,y0,x1,y1,...">
 0, 0.021592459,
 1, 0.020293111,
 2, 0.021807906,
@@ -220,66 +220,40 @@ a1{1}/(a2{1}+exp(-a3{2}*pow(x,2)))+a4{0}</textarea>
 32, 0.97150339,
 33, 0.970857997,
 34, 0.970553866,
-35, 0.969671404
-                        </textarea>
-                    </div>
-                    <button type="button" id="runFit" class="btn btn-primary mt-2 form-control" >Fit</button>
-                    <button type="button" id="runFitFourier" class="btn btn-primary mt-2 form-control" >Fit fourier series</button>
-                    <div class="form-group">
-                        <label for="fourierHarmonics">Number of harmonics</label>
-                        <div class="col">
-                            <input type="number" class="form-control" id="fourierHarmonics" value="4" min="1" max="100" step="1"/>
+35, 0.969671404</textarea>
+                        </div>
+                        <div class="form-row">
+                            <button id="plot-table" class="button form-col">Plot values</button>
                         </div>
                     </div>
                 </div>
-                <hr style="width:100%;"/>
-                <div id="generate" class="container">
-                    <div class="form-group">
-                        <label for="originalFunction">Expression</label>
-                        <input id="originalFunction" class="form-control" type="text" value = "x*x+6" placeholder="example: x*5+sin(x)+10">
+                <div id="resultsColumn">
+                    <div id="plot">
                     </div>
-                    <div class="form-row form-group">
-                        <label class="col" for="functionValues">Number of values</label>
-                        <div class="col">
-                            <input type="number" class="form-control" id="functionValues" value="100" min="10" max="1000" step="1"/>
-                        </div>
-                    </div>
-                    <div class="form-row form-group ">
-                        <label class="col" for="minRange">Min</label>
-                        <div class="col">
-                            <input type="number" class="form-control" id="minRange" value="0" min="-1000" max="1000" step="1"/>
-                        </div>
-                    </div>
-                    <div class="form-row form-group ">
-                        <label class="col" for="maxRange">Max</label>
-                        <div class="col">
-                            <input type="number" class="form-control" id="maxRange" value="10" min="-1000" max="1000" step="1"/>
-                        </div>
-                    </div>
-                    <div class="form-group form-row">
-                        <label for="noise" class="col">Amplitude of additive noise</label>
-                        <div class="col">
-                            <input type="number" class="form-control" id="noise" value="0.1" min="0" max="1000" step="0.1"/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" id="runPlot" class="btn btn-primary mt-2 form-control">Plot expression</button>
-                    </div>
-                    <div class="form-group">
-                        <button type="button" id="runGenerate" class="btn btn-primary mt-2 form-control">Generate values from expression</button>
-                    </div>
+                    <textarea id="log" disabled>
+                    </textarea>
                 </div>
             </div>
-            <div class="rightColumn d-flex flex-column">
-                <div id="plotContainer">
-                </div>
-                <div id="result">
-                    <textarea id="resultArea" readonly class="form-control"></textarea>
-                </div>
+            <div id="statusBar">
+                <div id="status">Ready</div><div class="vr"></div><progress id="progress-bar" value="1" min="0" max="1"></progress>
             </div>
         </div>
-    </div>
-    <script defer src="./bundle.js">
-    </script>
-</body>
+        <script defer src="./bundle.js">
+        </script>
+        <script>
+            /*$('*[data-role="tab"]').click(
+                function(e)
+                {
+                    let target = $(e.target);
+                    let parentId = target.data("parent");
+                    let parent=$('#'+parentId);
+                    let tabId = target.data("tab");
+                    $('[data-role="tab-item"][data-parent="'+parentId+'"').removeClass("show");
+                    $('[data-role="tab"][data-parent="'+parentId+'"').removeClass("active");
+                    target.addClass("active");
+                    $('#'+tabId).addClass("show");
+                }
+            );*/
+        </script>
+    </body>
 </html>

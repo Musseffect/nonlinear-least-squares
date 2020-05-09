@@ -1,0 +1,43 @@
+.parentControl
+{
+    height:100vh;
+    overflow-y:hidden;
+}
+.rightColumn
+{
+    overflow-x:hidden;
+    flex-grow:1;
+}
+.leftColumn,.rightColumn
+{
+    height:100%;
+    flex-shrink:0;
+    overflow-y:auto;
+}
+#valueTable {
+    resize:vertical;
+    /*width:max-content;*/
+}
+.parentRow
+{
+    height:100%;
+}
+#plotContainer
+{
+    flex-shrink:0;
+    width:800px;
+    height:400px;
+    /*width:100%;*/
+    /*align-self:center;*/
+}
+#resultArea
+{
+    resize:vertical;
+    height:500px;
+    width:800px;
+    margin:auto;
+}
+.leftColumn
+{
+    width:340px;
+}

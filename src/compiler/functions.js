@@ -5,7 +5,9 @@ import {
     ConstantNode,
     MultiplicationNode,
     SubtractionNode,
-    AdditionNode } from "./expressionNodes";
+    AdditionNode, 
+    VariableNode} from "./expressionNodes";
+import { Division } from "./stackElements";
 
 function step(x)
 {
@@ -31,6 +33,23 @@ function erf(x) {
 	return sign * y;
 }
 export const functionDictionary = {
+    sinc:{
+        exec:function(args){
+            if(args[0]<0.001)
+                return 1.0-args[0]*args[0]/6.0*(1.-args[0]*args[0]/20);//truncated maclaurin series 
+            return Math.sin(args[0])/args[0];
+        },
+        args:1,
+        name:'sinc',
+        derivatives:[
+            function(args){
+                return new DivisionNode(
+                    new SubtractionNode(new Function("cos",args),new Function("sinc",args)),
+                    args[0]
+                    );
+            }
+        ]
+    },
 	sin: {
 		exec: function (args) {
 			return Math.sin(args[0]);
