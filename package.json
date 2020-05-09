@@ -19,11 +19,7 @@
     "dependencies": {
         "antlr4": "4.8.0",
         "bootstrap": "^4.4.1",
-<<<<<<< HEAD
         "jquery": ">=3.5.0",
-=======
-        "jquery": "^3.5.0",
->>>>>>> d648c3e54c566e5c1dc9272f214374c6fa750b79
         "popper.js": "^1.16.1"
     }
 }
