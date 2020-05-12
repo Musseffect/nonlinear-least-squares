@@ -55,6 +55,7 @@
     width:100%;
     position:relative;
 }
+
 .button
 {
     background:linear-gradient(#fffdfd, #dcdbdb);
@@ -64,23 +65,25 @@
     cursor: pointer;
     user-select:none;
 }
-.button:focus
-{
-    background:linear-gradient(#fffdfd, #dcdbdb);
-    border:#a0a0a0 1px solid;
-}
-.button:hover:not([disabled])
+.button:hover
 {
     background:linear-gradient(#fffdfd, #eaeaea);
     border:black 1px solid;
 }
-.button[disabled]
+.button:focus
 {
-    color:gray;
+    background:linear-gradient(#fffdfd, #dcdbdb);
+    border:#a0a0a0 1px solid;
+    text-decoration:underline;
 }
 .button:active
 {
     background:linear-gradient(#dcdbdb,#fffdfd);
+    border:#a0a0a0 1px solid;
+}
+.button[disabled]
+{
+    color:gray;
     border:#a0a0a0 1px solid;
 }
 .horizontal-tab-header-panel>.top-tab-button
@@ -108,18 +111,12 @@
 {
     color:black;
     padding:0.2rem 0.4rem;
-    border-left:1px solid black;
-    border-right:1px solid black;
-    border-top:1px solid black;
     background:linear-gradient(#eae7e7, #ffffff);
 }
 .top-tab-button:active
 {
     color:black;
     padding:0.2rem 0.4rem;
-    border-left:1px solid gray;
-    border-right:1px solid gray;
-    border-top:1px solid gray;
     background:#dedede;
 }
 .top-tab-button.active

@@ -119,7 +119,7 @@ export function setStatus(status)
 }
 export function setProgress(value)
 {
-    $("#progress-bar")
+    $("#progress-bar").val(value);
 }
 export function setLog(text)
 {

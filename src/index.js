@@ -17,10 +17,10 @@ import {registerClickHandlers,getCurveFittingParameters,getExpressionPlottingPar
 let isRunning = false;
 function start()
 {
+  isRunning = true;
   disableButtons();
   setStatus("Busy...");
   setProgress(0);
-  isRunning = true;
 }
 function finish()
 {
@@ -31,7 +31,12 @@ function finish()
   isRunning = false;
 }
 
-registerClickHandlers(fitCurve,plotExpression,generateTable,plotTable,fitFourier);
+registerClickHandlers(
+  fitCurve,
+  plotExpression,
+  generateTable,
+  plotTable,
+  fitFourier);
 
 function plotTable()
 {
