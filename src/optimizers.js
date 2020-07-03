@@ -85,6 +85,40 @@ export class OptimizerGradient
         }
         return {solution:p,error:error};
     }
+    static runNormalApprox(f,dfdx,p0,x,y,iterations,errAbsTol,rate = 1.0)
+    {
+        let p = p0.slice();
+        let size = p0.length;
+        for (let i = 0; i < iterations; i++) {
+            let error = 0.0;
+            let dp = new vector(size);
+            for (let j = 0; j < x.length; j++) {
+                let r = f.f(x[j],p)-y[j];
+                let derivative = dfdx.f(x[j],p);
+                let scale = Math.pow(derivative,2)+1;
+                error+=r*r/scale;
+                let value = f.dfdp(x[j],p).subSelf(dfdx.dfdp(x[j],p).scaleSelf(derivative*r/scale));
+                dp.addSelf(value.scaleSelf(r/scale));
+            }
+            if(error<errAbsTol)
+            {
+                break;
+            }
+            dp.scaleSelf(-rate/x.length*2.0);
+            for(let k=0;k<size;k++)
+                p[k]+=dp.get(k);
+        }
+        let error = 0.0;
+        for(let i=0;i<x.length;i++)
+        {
+            let r = f.f(x[i],p)-y[i];
+            /*let derivative= dfdx.f(x[i],p);
+            let scale = Math.pow(derivative,2)+1;
+            error+=r*r/scale;*/
+            error+=r*r;
+        }
+        return {solution:p,error:error};
+    }
 }
 export class OptimizerGaussNewton
 {
@@ -107,7 +141,7 @@ export class OptimizerGaussNewton
                {
                    for(let l=0;l<size;l++)
                    { 
-                       let val = m.get(l,k)+drdp.get(k)*drdp.get(l)
+                        let val = m.get(l,k)+drdp.get(k)*drdp.get(l)
                         m.set(l,k,val);
                    }
                }
@@ -122,6 +156,53 @@ export class OptimizerGaussNewton
         for(let i=0;i<x.length;i++)
         {
             error+=Math.pow(f.f(x[i],p)-y[i],2.0);
+        }
+        return {solution:p,error:error};
+    }
+    static runNormalApprox(f,dfdx,p0,x,y,iterations,alpha,errAbsTol)
+    {
+        let p = p0.slice();
+        let size = p0.length;
+        for(let i=0;i<iterations;i++)
+        {
+           let _f = new vector(size);
+           let m = new matrix(size,size);
+           let error = 0.0;
+           for(let j=0;j<x.length;j++)
+           {
+               let r = f.f(x[j],p) - y[j];
+               let derivative= dfdx.f(x[j],p);
+               let scale = Math.pow(derivative,2)+1;
+               error+=r*r/scale;
+               let dfdxdp = dfdx.dfdp(x[j],p);
+               let dfdp = f.dfdp(x[j],p);
+               let dedp = dfdp.sub(dfdxdp.scale(derivative*r/scale)).scaleSelf(-r/scale*alpha);
+               _f.addSelf(dedp);
+               let scaleFactor = 1.0/Math.sqrt(scale);
+               let drdp = dfdp.scale(scaleFactor).subSelf(dfdxdp.scale(r*Math.pow(scaleFactor,3)*derivative));
+               for(let k=0;k<size;k++)
+               {
+                   for(let l=0;l<size;l++)
+                   { 
+                        let val = m.get(l,k)+drdp.get(k)*drdp.get(l)
+                        m.set(l,k,val);
+                   }
+               }
+           }
+           if(error<errAbsTol)
+                break;
+           let dp = matrix.solve(m,_f);
+           for(let i=0;i<size;i++)
+               p[i]+=dp.get(i);
+        }
+        let error = 0.0;
+        for(let i=0;i<x.length;i++)
+        {
+            let r = f.f(x[i],p)-y[i];
+            /*let derivative= dfdx.f(x[i],p);
+            let scale = Math.pow(derivative,2)+1;
+            error+=r*r/scale;*/
+            error+=r*r;
         }
         return {solution:p,error:error};
     }
@@ -142,17 +223,17 @@ export class OptimizerNewton
             {
                 let dfdp = f.dfdp(x[j],p);
                 let dfdpdp = f.dfdpdp(x[j],p);
-                let fy = f.f(x[j],p)-y[j];
+                let r = f.f(x[j],p)-y[j];
                 for(let k=0;k<size;k++)
                 {
                     for(let l=0;l<size;l++)
                     {
                         let value = hessian.get(l,k);
-                        value += dfdp.get(l)*dfdp.get(k)+fy*dfdpdp.get(l,k);//TODO check indicies
+                        value += dfdp.get(l)*dfdp.get(k)+r*dfdpdp.get(l,k);//TODO check indicies
                         hessian.set(l, k, value);
                     }
                     let value = dedp.get(k);
-                    value+=fy*dfdp.get(k);
+                    value+=r*dfdp.get(k);
                     dedp.set(k, value);
                 }
             }
@@ -175,6 +256,69 @@ export class OptimizerNewton
         for(let i=0;i<x.length;i++)
         {
             error+=Math.pow(f.f(x[i],p)-y[i],2.0);
+        }
+        return {solution:p,error:error};
+    }
+    static runNormalApprox(f,dfdx,p0,x,y,iterations,alpha,fAbsTol)
+    {
+        let p = p0.slice();
+        let size = p0.length;
+        for(let i=0;i<iterations;i++)
+        {
+            let hessian = new matrix(size,size);
+            let dedp = new vector(size);
+            for(let j=0;j<x.length;j++)
+            {
+                let dfdp = f.dfdp(x[j],p);
+                let dfdpdp = f.dfdpdp(x[j],p);
+                let dfdxdp = dfdx.dfdp(x[j],p);
+                let dfdxdpdp = dfdx.dfdpdp(x[j],p);
+                let dfdxf= dfdx.f(x[j],p);
+                let scale = Math.pow(dfdxf,2)+1;
+                let r = f.f(x[j],p)-y[j];
+                for(let k=0;k<size;k++)
+                {
+                    for(let l=0;l<size;l++)
+                    {
+                        let value = hessian.get(l,k);
+                        //TODO
+                        value += dfdp.get(l)*dfdp.get(k)/scale+
+                        r/scale*dfdpdp.get(l,k)-
+                        2*dfdp.get(l)*dfdxf*dfdxdp.get(k)*r/(scale*scale)-
+                        2*dfdp.get(k)*dfdxf*dfdxdp.get(l)*r/(scale*scale)-
+                        dfdxdp.get(l)*dfdxdp.get(k)*r*r/(scale*scale)-
+                        dfdxdpdp.get(l,k)*dfdxf*r*r/(scale*scale)+
+                        4*dfdxdp.get(l)*dfdxdp.get(k)*r*r/(scale*scale*scale)*dfdxf*dfdxf;
+                        hessian.set(l, k, value);
+                    }
+                    let value = dedp.get(k);
+                    value+=r*dfdp.get(k);
+                    dedp.set(k, value);
+                }
+            }
+            dedp.scaleSelf(-alpha);
+            let norm = dedp.l2norm();
+            let dp = matrix.solve(hessian,dedp);
+            for(let i=0;i<size;i++)
+                p[i]+=dp.get(i);
+            if(norm<fAbsTol)
+            {
+                let error = 0.0;
+                for(let i=0;i<x.length;i++)
+                {
+                    error+=Math.pow(f.f(x[i],p)-y[i],2.0);
+                }
+                return {solution:p,error:error};
+            }
+        }
+        let error = 0.0;
+        for(let i=0;i<x.length;i++)
+        {
+            let r = f.f(x[i],p)-y[i];
+            /*let derivative= dfdx.f(x[i],p);
+            let scale = Math.pow(derivative,2)+1;
+            error+=r*r/scale;*/
+            error+=r*r;
         }
         return {solution:p,error:error};
     }

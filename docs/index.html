@@ -3,7 +3,7 @@
         <title>Non-linear least squares</title>
         <link rel="stylesheet" type="text/css" href="./main.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
         <meta charset="utf-8" content=" text/html" http-equiv="content-type" />
     </head>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -36,12 +36,14 @@
                                     <div class="form-row">
                                         <button id="curve-fit" class="button form-col">Fit</button>
                                     </div>
+                                    <div class="form-row">
+                                        <button id="curve-fit-dist" class="button form-col">Fit with distance estimation</button>
+                                    </div>
                                     <div class="tab-control" id="methods">
                                         <div class="vertical-tab-header-panel">
                                             <div class="top-tab-button active" data-role="tab" data-tab="gradient-descent" data-parent="methods">Gradient descent method</div>
                                             <div class="top-tab-button" data-role="tab" data-tab="newton" data-parent="methods">Newton's method</div>
                                             <div class="top-tab-button" data-role="tab" data-tab="gauss-newton" data-parent="methods">Gauss-Newton method</div>
-                                            <div class="top-tab-button" data-role="tab" data-tab="particle-swarm" data-parent="methods">Particle swarm method</div>
                                         </div>
                                         <div class="tab-content-panel">
                                             <div class="tab-item-panel show" data-role="tab-item" id="gradient-descent" data-parent="methods">
@@ -96,40 +98,6 @@
                                                 <div class="form-row">
                                                     <label class="form-col">Error Abs. Tol.</label>
                                                     <input type="number" id="gauss-newton-err-abs-tol"  class="input form-col" value="0" min="0" step="0.1">
-                                                </div>
-                                            </div>
-                                            <div class="tab-item-panel" data-role="tab-item" id="particle-swarm" data-parent="methods">
-                                                <div class="form-row">
-                                                    <label class="form-col">Use</label>
-                                                    <input type="checkbox" id="particle-swarm-use" class="input form-col">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">Iterations</label>
-                                                    <input type="number" id="particle-swarm-iterations" class="input form-col" value="30" min="1" max="500" step="1">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">Particles</label>
-                                                    <input type="number" id="particle-swarm-particles" class="input form-col" value="15" min="1" max="100" step="1">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">W</label>
-                                                    <input type="number" id="particle-swarm-w" class="input form-col" value="0" min="0.3" max="1" step="0.05">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">&phi; p</label>
-                                                    <input type="number" id="particle-swarm-phi-p" class="input form-col" value="0" min="0.3" max="1" step="0.05">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">&phi; g</label>
-                                                    <input type="number" id="particle-swarm-phi-g" class="input form-col" value="0" min="0.3" max="1" step="0.05">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">Max initial value</label>
-                                                    <input type="number" id="particle-swarm-max" class="input form-col" value="1" step="0.05">
-                                                </div>
-                                                <div class="form-row">
-                                                    <label class="form-col">Min initial value</label>
-                                                    <input type="number" id="particle-swarm-min" class="input form-col" value="-1" step="0.05">
                                                 </div>
                                             </div>
                                         </div>
@@ -237,9 +205,9 @@
                     </textarea>
                 </div>
             </div>
-            <div id="statusBar">
+            <!--<div id="statusBar">
                 <div id="status">Ready</div><div class="vr"></div><progress id="progress-bar" value="1" min="0" max="1"></progress>
-            </div>
+            </div>-->
         </div>
         <script defer src="./bundle.js">
         </script>

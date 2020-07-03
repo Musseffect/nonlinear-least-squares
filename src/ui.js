@@ -14,7 +14,7 @@ $('*[data-role="tab"]').click(
 );
 
 
-export function registerClickHandlers(curveFit,plotExp,
+export function registerClickHandlers(curveFit,curveFitDist,plotExp,
     genExpTable,plotTable,fourierFit)
 {
     $("#curve-fit").click(curveFit);
@@ -22,6 +22,7 @@ export function registerClickHandlers(curveFit,plotExp,
     $("#generate-values").click(genExpTable);
     $("#plot-table").click(plotTable);
     $("#fourier-fit").click(fourierFit);
+    $("#curve-fit-dist").click(curveFitDist)
 }
 
 function getGradientDescentParameters()

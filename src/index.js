@@ -1,7 +1,6 @@
 import {
   OptimizerGradient,
   OptimizerNewton,
-  OptimizerSwarm,
   OptimizerGaussNewton,
   OptimizerFourier
 } from "./optimizers.js";
@@ -13,7 +12,6 @@ import {registerClickHandlers,getCurveFittingParameters,getExpressionPlottingPar
   getTableGenerationParameters,getTablePlotParameters,getFourierSeriesParameters,
   setStatus,setTableValues,setProgress,setLog,disableButtons,enableButtons} from "./ui.js";
 
-
 let isRunning = false;
 function start()
 {
@@ -24,7 +22,6 @@ function start()
 }
 function finish()
 {
-
   setProgress(1);
   setStatus("Done");
   enableButtons();
@@ -33,6 +30,7 @@ function finish()
 
 registerClickHandlers(
   fitCurve,
+  fitCurveDist,
   plotExpression,
   generateTable,
   plotTable,
@@ -170,6 +168,107 @@ function solutionToTrace(expression,s,min,max,points,name)
   }
   return {x:x,y:y,mode:'lines+markers',name:name};
 }
+function fitCurveDist()
+{
+  if(isRunning)
+    return;
+  start();
+  setLog("");
+  try{
+    let params = getCurveFittingParameters();
+    let compiledExp = compile(params.curve,["x"],(errors)=>{
+      let result = "";
+      errors.forEach((item,index)=>
+        {result+=`${index}: ${item.print()}\n`;}
+      );
+      setLog(result);
+      finish();
+    });
+    if(compiledExp===null)
+      return;
+    let p0=[];
+    compiledExp.variableNames.forEach((item)=>
+      {     
+        if(item!="x")
+        {
+          if(compiledExp.parameters[item]!==undefined)
+            p0.push(compiledExp.parameters[item]);
+          else
+            p0.push(0.0);
+        }
+      });
+    let exp = new LeastSquaresExpression(compiledExp.expression,compiledExp.variableNames);
+    let dfdx = new LeastSquaresExpression(compiledExp.expression.differentiate("x",0.001).simplify(),compiledExp.variableNames);
+    let result = ""; 
+    var traceXY = {
+      x: params.table.x,
+      y: params.table.y,
+      mode: 'markers',
+      name: 'initial points'
+    };
+    var data = [ traceXY ];
+    //gradient descent
+    if(params.gradientDescent.use)
+    {
+      let solution =  OptimizerGradient.runNormalApprox(
+        exp,
+        dfdx,
+        p0,
+        params.table.x,
+        params.table.y,
+        params.gradientDescent.iterations,
+        params.gradientDescent.errAbsTol,
+        params.gradientDescent.rate);
+      result +="Gradient Descent:\n"+ solutionToString(solution,compiledExp.variableNames);
+      data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Gradient descent"));
+    }
+    setProgress(0.33);
+    //newton's method
+    if(params.newton.use){
+      let solution = OptimizerNewton.runNormalApprox(
+        exp,
+        dfdx,
+        p0,
+        params.table.x,
+        params.table.y,
+        params.newton.iterations,
+        params.newton.alpha,
+        params.newton.errAbsTol);
+      result +="Newton method:\n" + solutionToString(solution,compiledExp.variableNames);
+      data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Newton's method"));
+    }
+    setProgress(0.67);
+    //gauss-newton method
+    if(params.gaussNewton.use){
+      let solution = OptimizerGaussNewton.runNormalApprox(
+        exp,
+        dfdx,
+        p0,
+        params.table.x,
+        params.table.y,
+        params.gaussNewton.iterations,
+        params.gaussNewton.alpha,
+        params.gaussNewton.errAbsTol);
+      result +="Gauss-newton method:\n" + solutionToString(solution,compiledExp.variableNames);
+      data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Gauss-newthon"));
+    }
+    setProgress(1);
+  
+    setLog(result);
+  
+    var layout = {
+      title:'Result',
+      width:0.95*$("#plot").width(),
+      height:0.95*$("#plot").height()
+    };
+  
+    Plotly.newPlot('plot', data, layout,{responsive:true});
+  }catch(error)
+  {
+    setLog(error);
+  }
+  finish();
+}
 function fitFourier()
 {
   if(isRunning)
@@ -178,7 +277,6 @@ function fitFourier()
   setLog("");
   try{
     let params = getFourierSeriesParameters();
-    let harmonics = parseInt($("#fourierHarmonics").val());
     let solution = OptimizerFourier.run(params.table.x,params.table.y,params.harmonics,params.table.max-params.table.min);//{a:[],b:[],a0:const}
     
     let result = "";
@@ -298,7 +396,7 @@ function fitCurve()
       result +="Gradient Descent:\n"+ solutionToString(solution,compiledExp.variableNames);
       data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Gradient descent"));
     }
-    setProgress(0.25);
+    setProgress(0.33);
     //newton's method
     if(params.newton.use){
       let solution = OptimizerNewton.run(
@@ -312,7 +410,7 @@ function fitCurve()
       result +="Newton method:\n" + solutionToString(solution,compiledExp.variableNames);
       data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Newton's method"));
     }
-    setProgress(0.5);
+    setProgress(0.67);
     //gauss-newton method
     if(params.gaussNewton.use){
       let solution = OptimizerGaussNewton.run(
@@ -326,24 +424,7 @@ function fitCurve()
       result +="Gauss-newton method:\n" + solutionToString(solution,compiledExp.variableNames);
       data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Gauss-newthon"));
     }
-    setProgress(0.75);
-    //particle swarm method
-    if(params.particleSwarm.use){
-      let solution = OptimizerSwarm.run(
-        exp,
-        p0,
-        params.table.x,
-        params.table.y,
-        params.particleSwarm.iterations,
-        params.particleSwarm.particles,
-        params.particleSwarm.w,
-        params.particleSwarm.p,
-        params.particleSwarm.g,
-        params.particleSwarm.max,
-        params.particleSwarm.min);
-      result +="Particle swarm method:\n" + solutionToString(solution,compiledExp.variableNames);
-      data.push(solutionToTrace(exp,solution,params.table.min,params.table.max,params.resolution,"Particle swarm"));
-    }
+    setProgress(1.);
   
     setLog(result);
   

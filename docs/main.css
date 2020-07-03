@@ -18,7 +18,7 @@
 {
     flex-basis:100%;
     width:100%;
-    height:100%;
+    /*height:100%;*/
     overflow-wrap:anywhere;
     word-break:break-word;
     flex-wrap:wrap;
@@ -171,7 +171,7 @@
 {
     resize:vertical;
     margin:10px;
-    height:100px;
+    height:200px;
 }
 #resultsColumn>*
 {
@@ -213,7 +213,7 @@
     border-style: inset;
     border-width: 1px;
     width:0px;
-    height:100%;
+    align-self:stretch;
 }
 #statusBar
 {
@@ -223,6 +223,8 @@
     overflow:hidden;
     flex-wrap:nowrap;
     padding:0.1rem;
+    flex-grow:0;
+    flex-shrink:0;
     align-items:center;
     border-top:1px solid gray;
     justify-content: flex-end;
@@ -248,4 +250,9 @@
     width:100px;
     flex-grow:0;
     flex-shrink:0;
+}
+html,body
+{
+    width:100%;
+    height:100%:
 }

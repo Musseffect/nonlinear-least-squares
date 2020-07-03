@@ -8,13 +8,15 @@
     "scripts": {
         "build:dev": "webpack --mode development --config webpack.dev.js",
         "build:prod": "webpack --mode production --config webpack.prod.js",
-        "watch:dev": "webpack --watch --mode development --config webpack.dev.js"
+        "watch:dev": "webpack --watch --mode development --config webpack.dev.js",
+        "start": "webpack-dev-server --mode development --host 0.0.0.0"
     },
     "keywords": [],
     "devDependencies": {
         "source-map-loader": "^0.2.4",
         "webpack": "4.42.1",
-        "webpack-cli": "^3.3.11"
+        "webpack-cli": "^3.3.11",
+        "webpack-dev-server": "^3.11.0"
     },
     "dependencies": {
         "antlr4": "4.8.0",
