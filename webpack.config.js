@@ -2,7 +2,7 @@ const path=require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    entry:'./src/index.js',
+    entry:'./src/index.ts',
     devtool: "inline-source-map",
     devServer: {
         contentBase: './docs',
@@ -12,7 +12,7 @@ module.exports = {
     node: { module: "empty", net: "empty", fs: "empty" },
     watch: false,
     watchOptions: {
-    ignored: /node_modules/,
+        ignored: /node_modules/,
     },
     plugins:
     [
@@ -24,11 +24,19 @@ module.exports = {
         path:path.resolve(__dirname,'docs')
     },
     resolve: {
-        // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.js']
     },
     module: {
-        rules: [{
+        rules: [
+            {
+                test: /\.ts(x?)$/,
+                exclude: /node_modules/,
+                use: [
+                    {
+                        loader: "ts-loader"
+                    }
+                ]
+            },{
                 enforce: "pre",
                 test: /\.js$/,
                 loader: "source-map-loader"

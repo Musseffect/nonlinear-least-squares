@@ -14,14 +14,18 @@
     "keywords": [],
     "devDependencies": {
         "source-map-loader": "^0.2.4",
+        "ts-loader": "^8.0.2",
         "webpack": "4.42.1",
         "webpack-cli": "^3.3.11",
         "webpack-dev-server": "^3.11.0"
     },
     "dependencies": {
+        "@types/antlr4": "^4.7.2",
+        "@types/jquery": "^3.5.0",
         "antlr4": "4.8.0",
         "bootstrap": "^4.4.1",
         "jquery": ">=3.5.0",
-        "popper.js": "^1.16.1"
+        "popper.js": "^1.16.1",
+        "typescript": "^3.9.7"
     }
 }

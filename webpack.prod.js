@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-  entry:'./src/index.js',
-  devtool: '',//'source-map' for production
+  entry:'./src/index.ts',
+  devtool: 'source-map',//'source-map' for production
   node: { module: "empty", net: "empty", fs: "empty" },
   optimization: {
     minimize: true
@@ -12,11 +12,20 @@ module.exports = {
     path: path.resolve(__dirname, 'docs')
   },
   resolve: {
-      extensions: ['.js']
+      extensions: [".ts", ".tsx",".js"]
   },
+  ignored: /node_modules/,
   module: {
     rules: [
-        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+        {
+          test: /\.ts(x?)$/,
+          exclude: /node_modules/,
+          use: [
+              {
+                  loader: "ts-loader"
+              }
+            ]
+        },
         {
             enforce: "pre",
             test: /\.js$/,
