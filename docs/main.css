@@ -145,6 +145,9 @@
     position:relative;
     border:1px solid gray;
     height:auto;
+    flex-grow:1;
+    flex-shrink:1;
+    overflow-y:hidden;
     background:linear-gradient(#dcdbdb,#efefef);
 }
 #controlsColumn
@@ -152,7 +155,7 @@
     display:flex;
     flex-direction:column;
     width:260px;
-    height:100%;
+    height:auto;
     overflow-x:hidden;
     overflow-y:auto;
     flex-shrink:0;
@@ -177,20 +180,19 @@
 {
     resize:none;
     /*margin:10px;*/
-    
-    flex-basis:50%;
+    flex-grow:1;
+    flex-shrink:1;
+    min-height:200px;
+    /*flex-basis:50%;*/
     /*height:200px;*/
     box-sizing:border-box;
-}
-#resultsColumn>*
-{
-    flex-shrink:0;
-    flex-grow:0;
 }
 #plot
 {
     flex-grow:0;
-    flex-basis:50%;
+    flex-shrink:0;
+    /*flex-basis:50%;*/
+    height:400px;
     /*margin:10px;
     min-height:300px;*/
 }
