@@ -14,13 +14,12 @@
   crossorigin="anonymous"></script>
     <body>
         <div id="container">
-            <div class="tab-control" id="task">
-                <div class="horizontal-tab-header-panel" style="padding-top:10px">
-                    <div class="top-tab-button active" data-role="tab" data-tab="least-squares" data-parent="task">Least squares</div>
-                    <div class="top-tab-button" data-role="tab" data-tab="continuous-optimization" data-parent="task">Continuous optimization</div>
-                    <div class="top-tab-button disabled" data-role="tab" data-tab="stochastic-optimization" data-parent="task">Stochastic optimization</div>
-                </div>
-                <div class="tab-content-panel">
+            <div class="horizontal-tab-header-panel" style="padding-top:10px">
+                <div class="top-tab-button active" data-role="tab" data-tab="least-squares" data-parent="task">Least squares</div>
+                <div class="top-tab-button" data-role="tab" data-tab="continuous-optimization" data-parent="task">Continuous optimization</div>
+                <div class="top-tab-button disabled" data-role="tab" data-tab="stochastic-optimization" data-parent="task">Stochastic optimization</div>
+            </div>
+            <div class="tab-content-panel">
                     <div id="least-squares" class="tab-item-panel show" data-role="tab-item" data-parent="task">
                         <div id="least-squares-container">
                             <div id="controlsColumn">
@@ -160,6 +159,10 @@
                                                 <div class="form-row">
                                                     <label class="form-col">Use mutation with priority</button>
                                                     <input class="input form-col" type="checkbox" id="genetic-mutation">
+                                                </div>
+                                                <div class="form-row">
+                                                    <label class="form-col">Include functions</button>
+                                                    <input class="input form-col" type="text" id="genetic-include-functions" value="sin,cos,exp">
                                                 </div>
                                                 <div class="form-row">
                                                     <button id="genetic-fit" class="button form-col">Fit</button>
