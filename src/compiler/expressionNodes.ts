@@ -97,7 +97,7 @@ export class FunctionNode extends ExpressionNode{
 		);
 		if(constantArgs){
 			let constArgs = args.map((item:ConstantNode)=>{return item.value;});
-			return new ConstantNode(this.function.eval(constArgs));
+			return new ConstantNode(this.function.exec(constArgs));
 		}
 		this.args = args;
 		return this;
