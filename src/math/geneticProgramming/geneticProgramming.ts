@@ -14,7 +14,7 @@ export class GeneticProgrammingFitting{
     functions:string[];
     constantRange:{min:number,max:number};
     maxDepth:number;
-    pickNode(depth:number):ExpressionNode{
+    private pickNode(depth:number):ExpressionNode{
         let type = Math.floor(8*Math.random());
         if(depth>=this.maxDepth)
             type = Math.floor(Math.random()*2)+1;
@@ -26,14 +26,16 @@ export class GeneticProgrammingFitting{
                 return new VariableNode(this.variables[index],index);
             }
             case NodeType._Function:{
-                let index = Math.floor(this.functions.length*Math.random());
-                let functionName:string = this.functions[index];
-                let functionEntry = functionDictionary[functionName];
-                let args = [];
-                for(let i = 0;i<functionEntry.args;i++){
-                    args.push(this.pickNode(depth+1));
+                if(this.functions.length!=0){
+                    let index = Math.floor(this.functions.length*Math.random());
+                    let functionName:string = this.functions[index];
+                    let functionEntry = functionDictionary[functionName];
+                    let args = [];
+                    for(let i = 0;i<functionEntry.args;i++){
+                        args.push(this.pickNode(depth+1));
+                    }
+                    return new FunctionNode(functionName,args);
                 }
-                return new FunctionNode(functionName,args);
             }
             case NodeType._Negation:
                 return new NegationNode(this.pickNode(depth+1));
@@ -55,7 +57,7 @@ export class GeneticProgrammingFitting{
         }
         return result;
     }
-    gatherNodes(node:ExpressionNode,
+    private gatherNodes(node:ExpressionNode,
         parent:ExpressionNode|null,
         depth:number,
         id:number,
@@ -71,21 +73,22 @@ export class GeneticProgrammingFitting{
        / \
     d:3  e:x
 
-      df/d(e) = d(a)/d(b) * d(b)/d(e)
+      df/d(e) = d(a)/d(b) * d(b)/d(e) = d(f)/d(g) * d(g)/d(x)
     */
-    gatherDerivatives(node:ExpressionNode,index:number,x:number,derValue:number,outArray:number[]):number{
+    private gatherDerivatives(node:ExpressionNode,index:number,x:number,derValue:number,outArray:number[]):number{
         outArray[index]+=derValue;
         let childs = node.args;
         node.childDerivatives([x]).forEach((item,childId)=>index = this.gatherDerivatives(childs[childId],index+1,x,derValue*item,outArray));
         return index;
     }
-    exchangeNode(formula:ExpressionNode,nodeInfo:NodeInfo):ExpressionNode{
+    private exchangeNode(formula:ExpressionNode,nodeInfo:NodeInfo):ExpressionNode{
         if(nodeInfo.parent==null)
             return this.pickNode(0);
         nodeInfo.parent.args[nodeInfo.id] = this.pickNode(nodeInfo.depth);
         return formula;
     }
-    mutateWithPriority(formula:ExpressionNode,x:number[],y:number[]):ExpressionNode{
+    //use derivative dErr/dNode as priority
+    private mutateWithPriority(formula:ExpressionNode,x:number[],y:number[]):ExpressionNode{
         let nodes:NodeInfo[] = [];
         this.gatherNodes(formula.clone(),null,0,0,nodes);
         let derivatives = nodes.map(()=>0);
@@ -97,7 +100,7 @@ export class GeneticProgrammingFitting{
         let random = Math.random()*derivativesTotal;
         let accum = 0;
         for(let i=0;i<derivatives.length;i++){
-            accum+=derivatives[i];
+            accum+=Math.abs(derivatives[i]);
             if(random<=accum)
             {
                 return this.exchangeNode(nodes[i].parent,nodes[i]);
@@ -105,15 +108,15 @@ export class GeneticProgrammingFitting{
         }
         return this.pickNode(0);
     }
-    mutate(formula:ExpressionNode):ExpressionNode{
+    private mutate(formula:ExpressionNode):ExpressionNode{
         let nodes:NodeInfo[] = [];
         this.gatherNodes(formula.clone(),null,0,0,nodes);
         let nodeIndex = Math.floor(Math.random()*nodes.length);
         return this.exchangeNode(formula, nodes[nodeIndex]);
     }
-    solve(x:number[],y:number[],iterations:number,maxDepth:number,useMutationPriority:boolean){
+    public solve(x:number[],y:number[],includeFunctions:string[],iterations:number,maxDepth:number,useMutationPriority:boolean){
+        this.functions = Object.keys(functionDictionary).filter(key=>{return includeFunctions.includes(key)});
         this.maxDepth = maxDepth;
-        this.functions = Object.keys(functionDictionary);
         this.variables = ["x"];
         this.constantRange = {min:-100,max:100};
         //create first formula

@@ -65,6 +65,7 @@ export function getGeneticCurveFittingParameters(){
         iterations:$("#genetic-iterations").val() as number,
         depth:parseInt($('#genetic-depth').val() as string),
         mutation:$("#genetic-mutation").prop("checked") as boolean,
+        includeFunctions:$("#genetic-include-functions").val() as string,
         table:getTableValues()
     };
 }
