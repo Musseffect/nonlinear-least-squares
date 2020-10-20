@@ -88,12 +88,7 @@ function plotTable(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:15,
-        r:15,
-        t:15,
-        b:15
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -140,12 +135,7 @@ function plotExpression(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:15,
-        r:15,
-        t:15,
-        b:15
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -293,12 +283,7 @@ function fitCurveDist(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:15,
-        r:15,
-        t:15,
-        b:15
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -359,12 +344,7 @@ function fitFourier(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:15,
-        r:15,
-        t:15,
-        b:15
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -403,12 +383,7 @@ function fitPiecewise(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:20,
-        r:20,
-        t:20,
-        b:20
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -510,12 +485,7 @@ function fitCurve(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:20,
-        r:20,
-        t:20,
-        b:20
-      }
+      automargin: true
     };
     //@ts-ignore
     Plotly.newPlot('plot', data, layout,{responsive:true});
@@ -530,8 +500,9 @@ function fitGenetic(){
   start();
   setLog("");
   let params = getGeneticCurveFittingParameters();
+  let includeFunctions = params.includeFunctions.split(',');
   let gpf = new GeneticProgrammingFitting();
-  let {error,formula} = gpf.solve(params.table.x,params.table.y,params.iterations,params.depth,params.depth,params.mutation);
+  let {error,formula} = gpf.solve(params.table.x,params.table.y,includeFunctions,params.iterations,params.depth,params.mutation);
   var traceXY = {
     x: params.table.x,
     y: params.table.y,
@@ -557,16 +528,11 @@ function fitGenetic(){
     title:'Result',
     width:$("#plot").width(),
     height:$("#plot").height(),
-    margin:{
-      l:15,
-      r:15,
-      t:15,
-      b:15
-    }
+    automargin: true,
   };
   //@ts-ignore
   Plotly.newPlot('plot', data, layout,{responsive:true});
-  setLog(`Genetic:\n\t Formula:${formula.print()},\n\tError:${error}`);
+  setLog(`Genetic:\n\tFormula:${formula.print()},\n\tError:${error}`);
   setProgress(100);
   finish();
 }
@@ -576,12 +542,7 @@ function fitGenetic(){
       title:'Result',
       width:$("#plot").width(),
       height:$("#plot").height(),
-      margin:{
-        l:20,
-        r:20,
-        t:20,
-        b:20
-      }
+      automargin: true
     };
   //@ts-ignore
   Plotly.newPlot('plot',data,layout,{responsive:true});
@@ -590,6 +551,7 @@ window.onresize = function(){
   //@ts-ignore
   Plotly.relayout('plot',{
     width:$("#plot").width(),
-    height:$("#plot").height()
+    height:$("#plot").height(),
+    automargin: true
   })
 }
