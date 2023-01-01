@@ -12,10 +12,10 @@
     },
     "keywords": [],
     "devDependencies": {
-        "source-map-loader": "^0.2.4",
-        "ts-loader": "^8.0.2",
-        "webpack": "4.42.1",
-        "webpack-cli": "^3.3.11"
+        "source-map-loader": "^4.0.1",
+        "ts-loader": "^8.4.0",
+        "webpack": "5.75.0",
+        "webpack-cli": "^5.0.1"
     },
     "dependencies": {
         "@types/antlr4": "^4.7.2",
